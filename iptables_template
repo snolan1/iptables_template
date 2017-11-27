@@ -1,0 +1,25 @@
+#!/bin/bash
+
+iptables -P INPUT ACCEPT
+iptables -F
+iptables -A INPUT -i lo -j ACCEPT -m comment --comment "allow all traffic on loopback"
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT -m comment --comment "allow already established connections"
+
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT -m comment --comment "allow all HTTP incoming"
+
+iptables -A INPUT -p tcp --dport 22 -s 10.111.1.0/24 -j ACCEPT -m comment --comment "SSH from asdf network"
+iptables -A INPUT -p tcp --dport 22 -s 10.111.3.0/24 -j ACCEPT -m comment --comment "SSH from asdf network"
+iptables -A INPUT -p tcp --dport 22 -s 10.111.60.0/24 -j ACCEPT -m comment --comment "SSH from asdf network"
+
+iptables -A INPUT -p tcp --dport 5432 -s 10.111.1.0/24 -j ACCEPT -m comment --comment "PostgreSQL from asdf network"
+iptables -A INPUT -p tcp --dport 5432 -s 10.111.3.0/24 -j ACCEPT -m comment --comment "PostgreSQL from asdf network"
+iptables -A INPUT -p tcp --dport 5432 -s 10.111.60.0/24 -j ACCEPT -m comment --comment "PostgreSQL from asdf network"
+
+iptables -A INPUT -p tcp -j DROP -m comment --comment "drop anything else"
+iptables -P INPUT DROP
+iptables -P FORWARD DROP
+iptables -P OUTPUT ACCEPT
+
+iptables -L -v
+
+/sbin/service iptables save
